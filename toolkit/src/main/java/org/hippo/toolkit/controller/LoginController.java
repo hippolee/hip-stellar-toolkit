@@ -17,7 +17,8 @@ public class LoginController {
     private static final Logger logger = LoggerFactory.getLogger(LoginController.class);
 
     @RequestMapping("/login")
-    public String login() {
+    public String login(String param) {
+//        Map<String, String> params =
         logger.debug("aaa");
         logger.info("bbb", new RuntimeException());
         logger.warn("ccc{}ccc{}ccc", "A", "B");

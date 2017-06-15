@@ -18,4 +18,6 @@
 
     <context:property-placeholder ignore-unresolvable="true" location="classpath:/config/*.properties" />
 
+    <import resource="classpath:spring/application-*.xml" />
+
 </beans>

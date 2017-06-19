@@ -7,7 +7,7 @@
        http://www.springframework.org/schema/data/mongo
        http://www.springframework.org/schema/data/mongo/spring-mongo.xsd">
 
-    <mongo:mongo-client id="mongo" replica-set="${mongo.hose}:${mongo.port}"
+    <mongo:mongo-client id="mongo" replica-set="${mongo.host}:${mongo.port}"
                         credentials="${mongo.user}:${mongo.password}@${mongo.dbname}">
         <mongo:client-options
                 connections-per-host="${mongo.connectionsPerHost}"

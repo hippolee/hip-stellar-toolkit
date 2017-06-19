@@ -1,0 +1,3 @@
+org/hippo/toolkit/entity/BaseVO.class
+org/hippo/toolkit/mybatis/plugin/CommentGeneratorPlugin.class
+org/hippo/toolkit/mybatis/plugin/SerializablePlugin.class

@@ -7,6 +7,7 @@
     <Appenders>
         <!-- 控制台输出 -->
         <Console name="STDOUT" target="SYSTEM_OUT">
+            <RegexFilter regex="org\." onMatch="ACCEPT" onMismatch="DENY"/>
             <!-- 输出日志的格式 -->
             <PatternLayout pattern="%d{DEFAULT} %-5p [ %t ] %l %M - %m%xEx%n"/>
         </Console>
@@ -52,13 +53,18 @@
         </RollingFile>
     </Appenders>
     <Loggers>
-        <logger name="org.springframework" level="INFO"></logger>
-        <root level="ALL">
-            <appender-ref ref="STDOUT"/>
-            <appender-ref ref="DEBUG-OUT"/>
-            <appender-ref ref="INFO-OUT"/>
-            <appender-ref ref="WARN-OUT"/>
-            <appender-ref ref="ERROR-OUT"/>
-        </root>
+        <Logger name="org.springframework.*" level="INFO" additivity="true">
+        </Logger>
+        <Logger name="com.mongodb.*" level="ERROR" additivity="true">
+        </Logger>
+        <Logger name="org.mybatis.*" level="ERROR" additivity="true">
+        </Logger>
+        <Root level="ALL">
+            <AppenderRef ref="STDOUT"/>
+            <AppenderRef ref="DEBUG-OUT"/>
+            <AppenderRef ref="INFO-OUT"/>
+            <AppenderRef ref="WARN-OUT"/>
+            <AppenderRef ref="ERROR-OUT"/>
+        </Root>
     </Loggers>
 </Configuration>

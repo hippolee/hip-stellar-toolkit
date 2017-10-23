@@ -120,7 +120,7 @@
                enableUpdateByExample="false"
                enableDeleteByExample="false"
                enableSelectByExample="false"
-               selectByExampleQueryId="true">
+               selectByExampleQueryId="false">
         </table>
     </context>
 </generatorConfiguration>

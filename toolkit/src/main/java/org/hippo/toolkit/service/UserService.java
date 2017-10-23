@@ -20,4 +20,8 @@ public class UserService {
         return userVOMapper.selectByPrimaryKey(id);
     }
 
+    public UserVO getUserByMobile(String mobile) {
+        return userVOMapper.selectByMobile(mobile);
+    }
+
 }

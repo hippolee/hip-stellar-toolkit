@@ -3,6 +3,7 @@ package org.hippo.toolkit.some;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
+import org.hippo.toolkit.util.OpenApiUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,104 +28,66 @@ public class EsnMessageDemo {
     /** 设成你的secret */
     private static final String SECRET = "e089863374a2585df2017b41990e1dfce9b788037270cec8056529dbf102";
 
+    //    private static final String OPENAPI_DOMAIN = "https://openapi.upesn.com";
+    private static final String OPENAPI_DOMAIN = "http://172.20.9.11:10200/openapi";
+
     /** 获取access_token的url */
-    private static final String URL_ACCESS_TOKEN = "https://openapi.upesn.com/token";
+    private static final String URL_ACCESS_TOKEN = OPENAPI_DOMAIN + "/token";
     /** 服务号发送文本消息url */
-    private static final String URL_SERVICE_TEXT = "https://openapi.upesn.com/rest/message/service/txt";
+    private static final String URL_SERVICE_TEXT = OPENAPI_DOMAIN + "/rest/message/service/txt";
+    /** 服务号发送图文消息url */
+    private static final String URL_SERVICE_MIXED = OPENAPI_DOMAIN + "/rest/message/service/mixed";
+
+    /** 待办中心新增接口 */
+    private static final String URL_TODOCENTER_ADD = OPENAPI_DOMAIN + "/thirdpart/todo/item";
+
     /** 服务号发送文本消息url（NC） */
-    private static final String URL_PALMYY_SERVICE_TEXT = "https://open.upesn.com/operation/palmyy/message/service/txt";
+    private static final String URL_PALMYY_SERVICE_TEXT = OPENAPI_DOMAIN + "/operation/palmyy/message/service/txt";
 
-    public static String getAccessToken() {
+    private static final String[][] TODO_DATA_ARRAY = {
+    };
+
+
+
+    public static void todoCenterAdd(String accessToken, String qzId, String appId, String businessKey,
+                                     String title, String content, String webUrl, String mobileUrl,
+                                     String[] memberIds, String oriMemberId, String type) {
         // url string
-        String urlString = URL_ACCESS_TOKEN + "?appid=" + APP_ID + "&secret=" + SECRET;
-        // request result
-        String result = doGet(urlString);
-        // JSONObject
-        JSONObject responseData = JSON.parseObject(result);
-
-        // result code
-        Integer code = responseData.getInteger("code");
-        // result message
-        String msg = responseData.getString("msg");
-
-        // data
-        JSONObject data = responseData.getJSONObject("data");
-        // access_token & expire_seconds
-        String accessToken = null;
-        Integer expiresIn = null;
-        if (data != null) {
-            accessToken = data.getString("access_token");
-            expiresIn = data.getInteger("expiresIn");
-        }
-
-        logger.info("response code: {}", code);
-        logger.info("response message: {}", msg);
-        logger.info("token: {}", accessToken);
-        logger.info("expires_in: {}", expiresIn);
-        return accessToken;
-    }
-
-    public static void sendServiceText(String accessToken) {
-        // url string
-        String urlString = URL_SERVICE_TEXT + "?access_token=" + accessToken;
+        String urlString = URL_TODOCENTER_ADD + "?access_token=" + accessToken;
 
         // request body
         JSONObject body = new JSONObject();
-        // 传你的空间ID
-        body.put("spaceId", "7945");
-        // 传你的服务号ID
-        body.put("pubAccId", "hiptest");
-        // 传你要怎么发，list:发给to的列表;all:发给所有人
-        body.put("sendScope", "list");
-        // 传你要发给谁，sendScope为list时生效
-        body.put("to", new String[]{"155359"});
-        // 传你要发的内容
-        body.put("content", "这里是消息内容");
-        String requestBody = body.toJSONString();
+        // 空间ID
+        body.put("qzId", qzId);
+        // 开放平台应用ID
+        body.put("openAppId", appId);
+        // 业务ID
+        body.put("businessKey", businessKey);
+        // 标题
+        body.put("title", title);
+        // 内容
+        body.put("content", content);
+        // Web端Url
+        body.put("webUrl", webUrl);
+        // 移动端Url
+        body.put("mUrl", mobileUrl);
+        // 接收方Ids
+        body.put("memIds", memberIds);
+        // 发送方Id
+        body.put("originMemId", oriMemberId);
+        // 类型
+        body.put("typeName", type);
+        // 截止时间
+        body.put("deadline", 1506700800000L);
 
-        // request result
-        String result = doPost(urlString, requestBody);
+        String result = doPost(urlString, body.toJSONString());
         if (!StringUtils.isEmpty(result)) {
             // JSONObject
             JSONObject responseData = JSON.parseObject(result);
             logger.info("response flag: {}", responseData.getInteger("flag"));
             logger.info("response message: {}", responseData.getString("message"));
         } else {
-            logger.info("send service text faild");
-        }
-    }
-
-    public static void sendPalmyyServiceText(String accessToken) {
-        // url string
-        String urlString = URL_PALMYY_SERVICE_TEXT + "?access_token=" + accessToken;
-
-        // request body
-        JSONObject body = new JSONObject();
-        // 传你的空间ID
-        body.put("spaceId", "7945");
-        // 传你的服务号ID
-        body.put("pubAccId", "hiptest");
-        // 传你要怎么发，list:发给to的列表;all:发给所有人
-        body.put("sendScope", "list");
-        // 传你要发给谁，sendScope为list时生效
-        body.put("to", new String[]{"13581587602"});
-        // toUserType,1是手机号
-        body.put("toUserType", "1");
-        // 传你要发的内容
-        body.put("content", "张添催办了您,主题为:张添提交流程类型为:晨会准备表;单据编号为:0000020的单据!,请尽快处理!");
-        String requestBody = body.toJSONString();
-
-        // request result
-//        requestBody = "{\"content\":\"张添催办了您,主题为:张添提交流程类型为:晨会准备表;单据编号为:0000020的单据!,请尽快处理!\",\"pubAccId\":\"ncapppubaccount\",\"sendScope\":\"list\",\"spaceId\":\"101615\",\"to\":[\"18111624781\"],\"toUserType\":\"1\"}";
-//        urlString = "https://open.upesn.com/operation/palmyy/message/service/txt?access_token=3f1d5d6556e6a9cd2d4708e287493f0be808ee089529f53a3b363bb5c96fcc30";
-        String result = doPost(urlString, requestBody);
-        if (!StringUtils.isEmpty(result)) {
-            // JSONObject
-            JSONObject responseData = JSON.parseObject(result);
-            logger.info("response flag: {}", responseData.getInteger("flag"));
-            logger.info("response message: {}", responseData.getString("message"));
-        } else {
-            logger.info("send palmyy service text faild");
+            logger.info("add todoCenter faild");
         }
     }
 
@@ -217,6 +180,21 @@ public class EsnMessageDemo {
             result = sb.toString();
         } catch (IOException e) {
             logger.error("do http post error with url:" + urlString, e);
+            try {
+                // responseReader
+                BufferedReader reader = new BufferedReader(
+                        new InputStreamReader(conn.getErrorStream(), "utf-8"));
+
+                StringBuilder sb = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line);
+                }
+                reader.close();
+                logger.info("response code: {}", conn.getResponseCode());
+                logger.info("response faild: {}", sb.toString());
+            } catch (Exception e1) {
+            }
         } finally {
             if (conn != null) {
                 conn.disconnect();
@@ -227,10 +205,23 @@ public class EsnMessageDemo {
 
     public static void main(String[] args) {
         // 第一步取AccessToken
-        String accessToken = getAccessToken();
+        //        String accessToken = getAccessToken(APP_ID, SECRET);
         // 第二部发消息
-//        sendServiceText(accessToken);
-        sendPalmyyServiceText(accessToken);
+        //        sendServiceText(accessToken);
+        //        sendPalmyyServiceText(accessToken);
+        //        String accessToken, String qzId, String appId, String businessKey,
+        //                String title, String content, String webUrl, String mobileUrl,
+        //                String[] memberIds, String oriMemberId, String type
+
+        //        {"917","234","nc000020","NC审批","陈大权 提交了编号为 CG00000000008441 的项目采购申请单，请及时审批。","NC"}
+        //        {"169590", "153494", "153493", "117503", "153450", "232402", "3256505"};
+        String accessToken = OpenApiUtils.getAccessToken("ad7d4871b3d56c25", "9266f83d8a268a6dabbbb7d230653382cab5ea53288489d3a68e591237fe");
+
+        String[] memberIds = {"169590", "153494", "153493", "117503", "153450", "232402", "3256505"};
+        for (String[] todoData : TODO_DATA_ARRAY) {
+            todoCenterAdd(accessToken, todoData[0], todoData[1], todoData[2], todoData[3], todoData[4],
+                    "", "", memberIds, "", todoData[5]);
+        }
     }
 
 }

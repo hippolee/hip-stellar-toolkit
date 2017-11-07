@@ -3,15 +3,28 @@ package org.hippo.toolkit.entity;
 import org.apache.commons.lang3.StringUtils;
 
 import java.text.SimpleDateFormat;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * JIRA事件消息对象
  */
 public class JiraMessageVO {
 
-    /** JIRA时间类型-创建 */
+    /** JIRA事件类型-问题创建 */
     public static final String JIRA_EVENT_ISSUE_CREATED = "jira:issue_created";
+    /** JIRA事件类型-问题修改 */
+    public static final String JIRA_EVENT_ISSUE_UPDATED = "jira:issue_updated";
+    /** JIRA事件类型-问题删除 */
+    public static final String JIRA_EVENT_ISSUE_DELETED = "jira:issue_deleted";
+
+
+    private static final Map<String, String> JIRA_FIELDS = new HashMap<>();
+    static {
+
+
+    }
 
     /** JIRA事件类型 */
     private String eventType;
@@ -49,6 +62,12 @@ public class JiraMessageVO {
     private List<String> components;
     /** 报告人 */
     private JiraUserVO reporter;
+    /** 状态 */
+    private String status;
+    /** 抄送人 */
+    private List<JiraUserVO> ccList;
+    /** 修改日志 */
+    private List<JiraChangeLogVO> changeLogList;
     /** 时间戳 */
     private Long timestamp;
 
@@ -63,7 +82,9 @@ public class JiraMessageVO {
      */
     public String getTitle() {
         if (JIRA_EVENT_ISSUE_CREATED.equals(getEventType())) {
-            return getCreator().getDisplayName() + "created an issue";
+            return getUser().getDisplayName() + "created an issue";
+        } else if (JIRA_EVENT_ISSUE_UPDATED.equals(getEventType())) {
+            return getUser().getDisplayName() + "updated an issue";
         }
         return "unknown jira event";
     }
@@ -117,6 +138,23 @@ public class JiraMessageVO {
                 sb.append("").append(getReporter().getDisplayName()).append("\n");
             }
             return sb.toString();
+        } else if (JIRA_EVENT_ISSUE_UPDATED.equals(getEventType())) {
+            StringBuffer sb = new StringBuffer();
+            // 友空间 / UPESN-XXXX
+            sb.append(getProject()).append(" / ").append(getIssueKey()).append("\n");
+            // 主题
+            if (!StringUtils.isEmpty(getSummary())) {
+                sb.append(getSummary()).append("\n");
+            }
+            // 更改人
+            sb.append("更改人：").append(getUser().getDisplayName()).append("\n");
+            // 更改日志
+            if (getChangeLogList() != null && getChangeLogList().size() > 0) {
+                for (JiraChangeLogVO changeLog : getChangeLogList()) {
+                    sb.append(changeLog.getField()).append(changeLog.getFrom()).append(" -> ").append("to");
+                }
+            }
+            return sb.toString();
         }
         return "unknown jira event";
     }
@@ -136,18 +174,24 @@ public class JiraMessageVO {
      * @return
      */
     public String getHightlight() {
+        StringBuffer sb = new StringBuffer();
+        sb.append(getProject()).append(" / ").append(getIssueKey());
+        if (!StringUtils.isEmpty(getSummary())) {
+            sb.append("|").append(getSummary());
+        }
         if (JIRA_EVENT_ISSUE_CREATED.equals(getEventType())) {
-            StringBuffer sb = new StringBuffer();
-            sb.append(getProject()).append(" / ").append(getIssueKey());
-            if (!StringUtils.isEmpty(getSummary())) {
-                sb.append("|").append(getSummary());
-            }
             if (getAssignee() != null) {
                 sb.append("|").append(getAssignee().getDisplayName());
             }
             if (getReporter() != null) {
                 sb.append("|").append(getReporter().getDisplayName());
             }
+            return sb.toString();
+        } else if (JIRA_EVENT_ISSUE_UPDATED.equals(getEventType())) {
+            if (getUser() != null) {
+                sb.append("|").append(getUser().getDisplayName());
+            }
+            return sb.toString();
         }
         return "";
     }
@@ -157,9 +201,9 @@ public class JiraMessageVO {
      *
      * @return
      */
-    public String getTo() {
+    public String[] getTo() {
         //        return getUser().getEmail();
-        return "litfb@yonyou.com";
+        return new String[]{"litfb@yonyou.com"};
     }
 
     public String getEventType() {
@@ -312,5 +356,29 @@ public class JiraMessageVO {
 
     public void setTimestamp(Long timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public List<JiraUserVO> getCcList() {
+        return ccList;
+    }
+
+    public void setCcList(List<JiraUserVO> ccList) {
+        this.ccList = ccList;
+    }
+
+    public List<JiraChangeLogVO> getChangeLogList() {
+        return changeLogList;
+    }
+
+    public void setChangeLogList(List<JiraChangeLogVO> changeLogList) {
+        this.changeLogList = changeLogList;
     }
 }

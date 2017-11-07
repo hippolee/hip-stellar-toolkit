@@ -16,6 +16,8 @@ public class OpenApiUtils {
 
     /** open-api */
     private static final String OPENAPI_DOMAIN = "https://openapi.yonyoucloud.com";
+    /** open */
+    private static final String OPEN_DOMAIN = "https://open.yonyoucloud.com";
     /** 获取access_token的url */
     private static final String URL_ACCESS_TOKEN = OPENAPI_DOMAIN + "/token";
     /** 服务号发送文本消息url */
@@ -27,7 +29,7 @@ public class OpenApiUtils {
     /** 应用号发送分享消息url */
     private static final String URL_APP_SHARE = OPENAPI_DOMAIN + "/rest/message/service/share";
     /** 服务号发送分享消息url（palmyy） */
-    private static final String URL_PALMYY_SHARE = OPENAPI_DOMAIN + "/operation/palmyy/message/service/share";
+    private static final String URL_PALMYY_SHARE = OPEN_DOMAIN + "/operation/palmyy/message/service/share";
 
     /** 用友集团appid */
     public static final String OPEN_APP_ID_YONYOU = "9ad99e4505b4d4ab";
@@ -111,6 +113,7 @@ public class OpenApiUtils {
         // 消息内容
         body.put("content", content);
 
+        logger.info("sendServiceText:{}:{}", urlString, body.toJSONString());
         // request result
         String result = HTTPClientUtils.doPostJson(urlString, body.toJSONString());
         return checkResult(result, urlString);
@@ -151,6 +154,7 @@ public class OpenApiUtils {
         body.put("desc", desc);
         body.put("detailUrl", detailUrl);
 
+        logger.info("sendServiceShare:{}:{}", urlString, body.toJSONString());
         // request result
         String result = HTTPClientUtils.doPostJson(urlString, body.toJSONString());
         return checkResult(result, urlString);
@@ -187,6 +191,7 @@ public class OpenApiUtils {
         // 消息内容
         body.put("content", content);
 
+        logger.info("sendAppText:{}:{}", urlString, body.toJSONString());
         // request result
         String result = HTTPClientUtils.doPostJson(urlString, body.toJSONString());
         return checkResult(result, urlString);
@@ -230,6 +235,7 @@ public class OpenApiUtils {
         body.put("desc", desc);
         body.put("detailUrl", detailUrl);
 
+        logger.info("sendAppShare:{}:{}", urlString, body.toJSONString());
         // request result
         String result = HTTPClientUtils.doPostJson(urlString, body.toJSONString());
         return checkResult(result, urlString);
@@ -275,12 +281,14 @@ public class OpenApiUtils {
         body.put("detailUrl", detailUrl);
         body.put("hightlight", hightlight);
 
+        logger.info("sendPalmyyShare:{}:{}", urlString, body.toJSONString());
         // request result
         String result = HTTPClientUtils.doPostJson(urlString, body.toJSONString());
         return checkResult(result, urlString);
     }
 
     private static boolean checkResult(String result, String identify) {
+        logger.info("checkResult:{}:{}", identify, result);
         if (!StringUtils.isEmpty(result)) {
             // JSONObject
             JSONObject responseData = JSON.parseObject(result);
@@ -289,12 +297,12 @@ public class OpenApiUtils {
                 logger.info("response flag: {}", flag);
                 logger.info("response message: {}", responseData.getString("message"));
                 if (flag == 0) {
+                    logger.info("do {} success", identify);
                     return true;
                 }
             }
-        } else {
-            logger.info("do {} faild", identify);
         }
+        logger.info("do {} faild", identify);
         return false;
     }
 

@@ -36,9 +36,8 @@ public class CommonTest {
     }
 
     public static void main(String[] args) {
-//        testString();
-//        testInteger();
-//        testInteger2();
+        testString();
+        testInteger();
     }
 
 }

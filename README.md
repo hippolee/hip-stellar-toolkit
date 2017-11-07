@@ -1,2 +1,2 @@
-# hip-stellar-toolkit
-Stellar Toolkit
+# hip-toolkit
+Toolkit Project
